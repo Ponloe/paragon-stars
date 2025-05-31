@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -9,30 +10,42 @@ import { Chrome, GraduationCap, Users, Shield, Sparkles } from "lucide-react"
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const token = searchParams.get('token')
+    const user = searchParams.get('user')
+    const errorParam = searchParams.get('error')
+
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam))
+    }
+
+    if (token && user) {
+      try {
+        const userData = JSON.parse(decodeURIComponent(user))
+        
+        localStorage.setItem("isAuthenticated", "true")
+        localStorage.setItem("authToken", token)
+        localStorage.setItem("userEmail", userData.email)
+        localStorage.setItem("userData", JSON.stringify(userData))
+
+        window.location.href = "/"
+      } catch (err) {
+        setError("Failed to process authentication data")
+      }
+    }
+  }, [searchParams])
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     setError("")
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      const mockEmail = "student@paragoniu.edu.kh" 
-      const schoolDomain = "@paragoniu.edu.kh"
-
-      if (!mockEmail.endsWith(schoolDomain)) {
-        throw new Error("Access denied. Please use your university email address.")
-      }
-
-      // Simulate successful login
-      localStorage.setItem("isAuthenticated", "true")
-      localStorage.setItem("userEmail", mockEmail)
-
-      // Redirect to main app
-      window.location.href = "/"
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
+      window.location.href = `${backendUrl}/auth/google`
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Authentication failed")
-    } finally {
+      setError("Failed to initiate Google sign-in")
       setIsLoading(false)
     }
   }
@@ -95,7 +108,7 @@ export default function AuthPage() {
               {isLoading ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-                  <span>Signing in...</span>
+                  <span>Redirecting to Google...</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">

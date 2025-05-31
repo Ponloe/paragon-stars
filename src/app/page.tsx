@@ -164,16 +164,26 @@ export default function FunStudentDirectory() {
   const [filterYear, setFilterYear] = useState("all")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userEmail, setUserEmail] = useState("")
+  const [userData, setUserData] = useState<any>(null)
   const router = useRouter()
 
   useEffect(() => {
     // Check authentication status
     const authStatus = localStorage.getItem("isAuthenticated")
     const email = localStorage.getItem("userEmail")
+    const storedUserData = localStorage.getItem("userData")
 
     if (authStatus === "true" && email) {
       setIsAuthenticated(true)
       setUserEmail(email)
+      
+      if (storedUserData) {
+        try {
+          setUserData(JSON.parse(storedUserData))
+        } catch (err) {
+          console.error('Failed to parse user data:', err)
+        }
+      }
     } else {
       router.push("/auth")
     }
@@ -182,6 +192,8 @@ export default function FunStudentDirectory() {
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated")
     localStorage.removeItem("userEmail")
+    localStorage.removeItem("authToken")
+    localStorage.removeItem("userData")
     router.push("/auth")
   }
 
@@ -217,7 +229,10 @@ export default function FunStudentDirectory() {
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <p className="text-sm text-gray-600">Welcome back!</p>
-                <p className="text-sm font-medium text-gray-800">{userEmail}</p>
+                <p className="text-sm font-medium text-gray-800">
+                  {userData?.firstName} {userData?.lastName}
+                </p>
+                <p className="text-xs text-gray-500">{userEmail}</p>
               </div>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
