@@ -246,7 +246,7 @@ export default function FunStudentDirectory() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <Input
-                placeholder="Search students, interests, vibes..."
+                placeholder="Search students..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 w-80 bg-white/70 backdrop-blur-sm border-white/30"
